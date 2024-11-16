@@ -5,7 +5,12 @@ class MarkerLine {
   private thickness: number;
   private color: string;
 
-  constructor(initialX: number, initialY: number, thickness: number, color: string) {
+  constructor(
+    initialX: number,
+    initialY: number,
+    thickness: number,
+    color: string,
+  ) {
     this.points.push({ x: initialX, y: initialY });
     this.thickness = thickness;
     this.color = color;
@@ -98,6 +103,11 @@ class ToolPreview {
 const APP_NAME = "Stick N Sketch";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
+//I believe that all of the GUI elements should probably be created in the same area so you can easily arrange them, but this is fine for now.
+const buttonRowOne = document.createElement("div");
+const buttonRowTwo = document.createElement("div");
+const buttonRowThree = document.createElement("div");
+
 const header = document.createElement("h1");
 header.innerHTML = APP_NAME;
 app.append(header);
@@ -108,6 +118,8 @@ const canvas = document.createElement("canvas");
 canvas.width = 256;
 canvas.height = 256;
 app.appendChild(canvas);
+
+app.append(buttonRowOne, buttonRowTwo, buttonRowThree);
 
 const context = canvas.getContext("2d")!;
 let drawing = false;
@@ -127,7 +139,7 @@ let currentSticker: Sticker | null = null;
 const stickers = [
   { emoji: "👤" },
   { emoji: "🕶" },
-  { emoji: "🧢" }
+  { emoji: "🧢" },
 ];
 
 function generateRandomColor(): string {
@@ -151,7 +163,7 @@ function exportCanvas() {
   const exportContext = exportCanvas.getContext("2d")!;
   exportContext.scale(4, 4);
 
-  strokes.forEach(stroke => stroke.display(exportContext));
+  strokes.forEach((stroke) => stroke.display(exportContext));
 
   const anchor = document.createElement("a");
   anchor.href = exportCanvas.toDataURL("image/png");
@@ -159,9 +171,11 @@ function exportCanvas() {
   anchor.click();
 }
 
+buttonRowThree.id = "export-controls";
+
 const exportButton = document.createElement("button");
 exportButton.textContent = "Export as PNG";
-app.appendChild(exportButton);
+buttonRowThree.append(exportButton);
 exportButton.addEventListener("click", exportCanvas);
 
 function endStroke() {
@@ -203,6 +217,9 @@ canvas.addEventListener("mousemove", (event) => {
 
   if (drawing && currentStroke) {
     addPoint(event);
+
+    //Also display the current stroke while drawing
+    currentStroke.display(context);
   } else if (toolPreview) {
     toolPreview.updatePosition(x, y);
     dispatchToolMovedEvent();
@@ -240,46 +257,41 @@ function dispatchToolMovedEvent() {
 canvas.addEventListener("drawing-changed", redraw);
 canvas.addEventListener("tool-moved", redraw);
 
-const controlsDiv = document.createElement("div");
-controlsDiv.id = "controls";
-app.appendChild(controlsDiv);
+buttonRowOne.id = "controls";
 
 const clearButton = document.createElement("button");
 clearButton.textContent = "Clear";
-controlsDiv.appendChild(clearButton);
+buttonRowOne.appendChild(clearButton);
 
 const undoButton = document.createElement("button");
 undoButton.textContent = "Undo";
-controlsDiv.appendChild(undoButton);
+buttonRowOne.appendChild(undoButton);
 
 const redoButton = document.createElement("button");
 redoButton.textContent = "Redo";
-controlsDiv.appendChild(redoButton);
+buttonRowOne.appendChild(redoButton);
 
 const thickButton = document.createElement("button");
 thickButton.textContent = "Thick";
-controlsDiv.appendChild(thickButton);
+buttonRowOne.appendChild(thickButton);
 
 const thinButton = document.createElement("button");
 thinButton.textContent = "Thin";
-controlsDiv.appendChild(thinButton);
+buttonRowOne.appendChild(thinButton);
 
 // Sticker controls
-const stickerControlsDiv = document.createElement("div");
-stickerControlsDiv.id = "sticker-controls";
-stickerControlsDiv.style.display = "flex";
-app.appendChild(stickerControlsDiv);
+buttonRowTwo.id = "sticker-controls";
 
 // Add custom sticker button to the sticker controls
 const customStickerButton = document.createElement("button");
 customStickerButton.textContent = "Add Custom Sticker";
-stickerControlsDiv.appendChild(customStickerButton);
+buttonRowTwo.appendChild(customStickerButton);
 
 // Add sticker buttons
-stickers.forEach(sticker => {
+stickers.forEach((sticker) => {
   const button = document.createElement("button");
   button.textContent = sticker.emoji;
-  stickerControlsDiv.appendChild(button);
+  buttonRowTwo.appendChild(button);
 
   button.addEventListener("click", () => {
     currentRotation = generateRandomRotation();
@@ -302,7 +314,7 @@ customStickerButton.addEventListener("click", () => {
 function createStickerButton(sticker: { emoji: string }) {
   const button = document.createElement("button");
   button.textContent = sticker.emoji;
-  stickerControlsDiv.appendChild(button);
+  buttonRowTwo.appendChild(button);
 
   button.addEventListener("click", () => {
     currentRotation = generateRandomRotation();

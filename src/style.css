@@ -20,6 +20,7 @@
 canvas {
   border: 1px solid black; /* Adds a thin black border */
   border-radius: 25% 10%;
+  background-color: #888888;
 }
 
 a {
@@ -80,6 +81,13 @@ h1 {
 #sticker-controls {
   display: flex;
   justify-content: flex-end;
+  width: 100%;
+  margin-top: 10px;
+}
+
+#export-controls {
+  display: flex;
+  justify-content: center;
   width: 100%;
   margin-top: 10px;
 }
